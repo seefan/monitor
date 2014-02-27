@@ -1,0 +1,1 @@
+<RelationConfig><Relations><Relation><Id>BSC</Id><Childs><Child><Id>1</Id><Childs><Child>1</Child><Child>10</Child><Child>100</Child></Childs></Child><Child><Id>1</Id><Childs><Child>1</Child><Child>3</Child><Child>100</Child></Childs></Child></Childs></Relation></Relations></RelationConfig>
