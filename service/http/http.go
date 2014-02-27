@@ -100,7 +100,7 @@ func (this *HttpService) HandleSocket(ws *websocket.Conn) {
 	log.Infof("accept new http client from %s\n", connFrom)
 	c := this.getClient(ws.Request())
 	c.Connect = ws
-	
+
 	go this.HandleResponse(c)
 	this.HandleRequest(c)
 }
@@ -153,7 +153,7 @@ func (this *HttpService) HandleRequest(c *HttpClient) {
 		protocol.Exec(cmd, &c.Client)
 		if cmd.Pid == 1 && c.IsLogin {
 			log.Info("client %s is login,set cookie", c.Name)
-			this.setCookie(c, c.Connect. 0)
+			//this.setCookie(c, c.Connect. 0)
 		}
 		c.UpdateTime()
 	}
