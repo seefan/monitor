@@ -47,18 +47,19 @@ func SendToAll(cmd interface{}) {
 
 //将客户端加到在线列表
 func Set(c *Client) {
-	if _, ok := onlineClient[c.UUID]; ok { //说明已存在同名用户
-		log.Infof("user %s login multiple")
-	} else {
+	if _, ok := onlineClient[c.UUID]; !ok { //说明已存在同名用户
 		onlineClient[c.UUID] = c
 	}
 
 }
-func Get(name string) *Client {
-	if v, ok := onlineClient[name]; ok {
-		return v
+
+//取指定客户端
+func Get(name string) (client *Client, ok bool) {
+	if v, exists := onlineClient[name]; exists {
+		client = v
+		ok = true
 	}
-	return nil
+	return nil, false
 }
 
 //将客户端从在线列表中删除

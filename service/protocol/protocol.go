@@ -185,11 +185,13 @@ func pid1(cmd *common.RequestData, c *online.Client) {
 	//check
 	re := make(map[string]interface{})
 	if loginSuccess {
-
 		c.IsLogin = true
+		c.Key = common.HashString(c.UUID + ":" + c.Name)
 		log.Infoln("login", c.Name, c.IsLogin)
 		re["LoginState"] = 0
 		re["Message"] = "login success"
+		re["UID"] = c.UUID
+		re["Key"] = c.Key
 	} else {
 		re["LoginState"] = -1
 		re["Message"] = "login failed"

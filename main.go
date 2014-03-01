@@ -22,6 +22,7 @@ func main() {
 		panic(err.Error())
 	}
 	cache.Init(cfg, rcfg)
+	LoadBaseData()
 	dispatcher.Start(cfg)
 	time.Sleep(time.Hour)
 	//if str, err := ioutil.ReadFile("config/config.xml"); err == nil {
@@ -29,7 +30,7 @@ func main() {
 	//} else {
 	//	panic(err.Error())
 	//}//
-	//LoadBaseData()
+
 	//test.Test_Dispatcher()
 	//test.Test_MutiCache()
 	//test.Test_Push()

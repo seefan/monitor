@@ -103,7 +103,7 @@ func GetClient(key string) (*RedisClient, error) {
 
 			select {
 			case client := <-c:
-				log.Info("get client id is %s", client.Id)
+				//log.Info("get client id is %s", client.Id)
 				return client, nil
 			case <-timeout:
 				return nil, fmt.Errorf("get connection time out")

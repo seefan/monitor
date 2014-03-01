@@ -21,6 +21,7 @@ type Client struct {
 	lock           sync.RWMutex
 	UUID           string
 	LastUpdateTime time.Time
+	Key            string
 }
 
 func (this *Client) UpdateTime() {
