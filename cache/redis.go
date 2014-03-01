@@ -10,7 +10,7 @@ import (
 	"monitor/config"
 	"monitor/log"
 	"sync"
-	//	"time"
+	"time"
 )
 
 var (
@@ -98,8 +98,16 @@ func getId(key string) (string, error) {
 func GetClient(key string) (*RedisClient, error) {
 	if id, err := getId(key); err == nil {
 		if c, ok := pool[id]; ok {
+			timeout := time.After(time.Second * 10)
 			//client := <-c
-			//log.Info("get client id is %s", id)
+
+			select {
+			case client := <-c:
+				log.Info("get client id is %s", client.Id)
+				return client, nil
+			case <-timeout:
+				return nil, fmt.Errorf("get connection time out")
+			}
 			return <-c, nil
 		}
 	}
