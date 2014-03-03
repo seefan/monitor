@@ -63,9 +63,6 @@ func (this *HttpService) HandleHttp(w http.ResponseWriter, req *http.Request) {
 		cmd := new(common.RequestData)
 		c.Read([]byte(data), cmd)
 		protocol.Exec(cmd, &c.Client)
-		if cmd.Pid == 1 && c.IsLogin {
-			SetSession(c.UUID, c.Key)
-		}
 	} else {
 		cmd := common.ResponseData{0, -1, "json string is empty", ""}
 		c.Send(&cmd)
@@ -88,7 +85,7 @@ end:
 //按cookei取在线用户
 func (this *HttpService) getClient(uid string, key string) *HttpClient {
 	c := new(HttpClient)
-	if s, ok := GetSession(uid); ok && s == key { //key相同时认为已登陆过的
+	if s, _, ok := online.GetSession(uid); ok && s == key { //key相同时认为已登陆过的
 		if tc, ok := online.Get(uid); ok { //第一个登陆的Client的uuid被当作了uid
 			c.Name = tc.Name
 			c.IsLogin = tc.IsLogin
@@ -169,11 +166,6 @@ func (this *HttpService) HandleRequest(c *HttpClient) {
 		}
 		c.Read(data, cmd)
 		protocol.Exec(cmd, &c.Client)
-		if cmd.Pid == 1 && c.IsLogin { //登陆成功后加到在线用户
-			online.Set(&c.Client)
-			SetSession(c.UUID, c.Key)
-		}
 		c.UpdateTime()
-		FreshSession(c.UUID)
 	}
 }

@@ -82,6 +82,7 @@ func (this *TcpService) Run() {
 
 //send cmd to client
 func (this *TcpService) HandleResponse(c *TcpClient) {
+	defer online.Delete(c.Name)
 	c.Connect.SetWriteBuffer(common.BufferSize)
 	//c.Connect.SetNoDelay(true)
 	var err error
@@ -94,16 +95,15 @@ func (this *TcpService) HandleResponse(c *TcpClient) {
 			break //结束协程
 		}
 	}
-	online.Delete(c.Name)
 }
 
 //handle tcp request
 func (this *TcpService) HandleRequest(c *TcpClient) {
+	defer online.Delete(c.Name)
 	nr := bufio.NewReader(c.Connect)
 	var err error
 	var data []byte
 	cmd := new(common.RequestData)
-	online.Set(&c.Client)
 	for this.IsRun && c.IsRun {
 		data, err = nr.ReadBytes(common.NewLine) //读取一行数据
 		if err != nil {
@@ -118,5 +118,5 @@ func (this *TcpService) HandleRequest(c *TcpClient) {
 		//log.Info("server cmd", cmd)
 		protocol.Exec(cmd, &c.Client)
 	}
-	online.Delete(c.Name)
+
 }

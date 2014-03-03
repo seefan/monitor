@@ -26,6 +26,7 @@ type Client struct {
 
 func (this *Client) UpdateTime() {
 	this.LastUpdateTime = time.Now()
+	FreshSession(this.UUID)
 }
 
 //客户端关闭接口
@@ -43,7 +44,7 @@ func (this *Client) Send(cmd *common.ResponseData) {
 //read cmd from byte
 func (this *Client) Read(data []byte, cmd *common.RequestData) {
 	if err := json.Unmarshal(data, cmd); err != nil {
-		log.Error("cmd format error,", err.Error())
+		log.Error("cmd format error,cmd string is %s,error is %s", string(data), err.Error())
 	}
 }
 

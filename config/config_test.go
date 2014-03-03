@@ -20,7 +20,7 @@ func Test_config(t *testing.T) {
 	}
 	cfg.Inputs = new(DataFace)
 
-	rs := []*Redis{&Redis{Host: "192.168.8.113", Port: 6379, DB: 12, Id: "redis113"}}
+	rs := []*Redis{&Redis{Host: "192.168.8.113", Port: 6379, DB: 12, Id: "redis113", Enable: true}}
 	cfg.Redises = rs
 
 	ga := new(Summary)

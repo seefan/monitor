@@ -147,7 +147,8 @@ type Redis struct {
 	Host     string
 	Port     int
 	Password string
-	DB       int
+	DB       int  //DB号
+	Enable   bool //是否启用
 }
 
 //Tcp服务

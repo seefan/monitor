@@ -49,6 +49,9 @@ const (
 func initRedis(confs []*config.Redis) {
 	ids = ring.New(len(confs))
 	for _, conf := range confs {
+		if !conf.Enable {
+			continue
+		}
 		id := &IdAvailable{Id: conf.Id}
 		ids.Value = id
 		spec := redis.DefaultSpec().Db(conf.DB).Password(conf.Password).Host(conf.Host).Port(conf.Port)
@@ -83,8 +86,8 @@ func getId(key string) (string, error) {
 			return id, nil
 		} else {
 			//首先检查是否
-			for tid := ids.Value.(*IdAvailable); tid.IsAvailable; ids = ids.Next() {
-				id = tid.Id
+			for tid := ids.Value; tid != nil && tid.(*IdAvailable).IsAvailable; ids = ids.Next() {
+				id = tid.(*IdAvailable).Id
 				//log.Info("client id is %s", id)
 				break
 			}

@@ -17,11 +17,26 @@ var (
 	now time.Time          //start time
 )
 
+//init pid
+func init() {
+	pid = map[int]PidProcess{ //以0为区分，0以下的id都不需要进行登陆
+		0:  pid0,  //运行状态测试
+		-1: pid_1, //登陆
+		-2: pid_2, //退出
+		-3: pid_3, //用临时key重新登陆，用户登陆后会临时产生
+		2:  pid2,  //数据推送注册
+		3:  pid3,  //数据库的读操作
+		4:  pid4,  //数据库的写操作
+		5:  pid5,  //更新节点内的父子关系
+	}
+	now = time.Now()
+}
+
 //exec pid function
 func Exec(cmd *common.RequestData, c *online.Client) {
 
-	//没有登陆就必须登陆系统，除协议0,-1,1以外
-	if cmd.Pid == 0 || cmd.Pid == -1 || cmd.Pid == 1 {
+	//没有登陆就必须登陆系统，小于等于0的协议不需要登陆。
+	if cmd.Pid <= 0 {
 		pid[cmd.Pid](cmd, c)
 	} else if !c.IsLogin {
 		cmd := common.ResponseData{1, 0, "need login", nil}
@@ -69,20 +84,6 @@ func pid4(cmd *common.RequestData, c *online.Client) {
 		return
 	}
 	writepid(c, cmd, 0, nil)
-}
-
-//init pid
-func init() {
-	pid = map[int]PidProcess{
-		0:  pid0,  //运行状态测试
-		1:  pid1,  //登陆
-		-1: pid_1, //退出
-		2:  pid2,  //数据推送注册
-		3:  pid3,  //数据库的读操作
-		4:  pid4,  //数据库的写操作
-		5:  pid5,  //更新节点内的父子关系
-	}
-	now = time.Now()
 }
 
 //注册推送数据的请求
@@ -157,8 +158,43 @@ func writePrror(msg string, cmd *common.RequestData, c *online.Client) {
 	writepid(c, cmd, -1, msg)
 }
 
+//key login in
+func pid_3(cmd *common.RequestData, c *online.Client) {
+	if checkParamError(cmd, c, "UID", "Key") {
+		return
+	}
+
+	login := cmd.GetString("UID")
+	pwd := cmd.GetString("Key")
+
+	loginSuccess := false
+	//log.Info("pid -3 uid=key", login, pwd)
+	//check session
+	if name, key, ok := online.GetSession(login); ok && key == pwd {
+		c.Name = name
+		c.Key = key
+		loginSuccess = true
+		//log.Info("get session success", key)
+	}
+
+	//check
+	re := make(map[string]interface{})
+	if loginSuccess {
+		c.IsLogin = true
+		re["LoginState"] = 0
+		re["Message"] = "login success"
+		re["UID"] = c.UUID
+		re["Key"] = c.Key
+	} else {
+		re["LoginState"] = -1
+		re["Message"] = "login failed"
+	}
+	online.Set(c)
+	writepid(c, cmd, 0, re)
+}
+
 // login in
-func pid1(cmd *common.RequestData, c *online.Client) {
+func pid_1(cmd *common.RequestData, c *online.Client) {
 	if checkParamError(cmd, c, "Login", "Password") {
 		return
 	}
@@ -187,16 +223,16 @@ func pid1(cmd *common.RequestData, c *online.Client) {
 	if loginSuccess {
 		c.IsLogin = true
 		c.Key = common.HashString(c.UUID + ":" + c.Name)
-		log.Infoln("login", c.Name, c.IsLogin)
+		online.SetSession(c.UUID, c.Name, c.Key)
 		re["LoginState"] = 0
 		re["Message"] = "login success"
 		re["UID"] = c.UUID
 		re["Key"] = c.Key
+		online.Set(c)
 	} else {
 		re["LoginState"] = -1
 		re["Message"] = "login failed"
 	}
-
 	writepid(c, cmd, 0, re)
 }
 
@@ -213,12 +249,12 @@ func pid1(cmd *common.RequestData, c *online.Client) {
 // }
 
 //login out
-func pid_1(cmd *common.RequestData, c *online.Client) {
+func pid_2(cmd *common.RequestData, c *online.Client) {
 	//if param, ok := cmd.Param.(string); ok {
 	log.Debug("login out ", c.Name)
 	writepid(c, cmd, 0, nil)
 	c.IsRun = false
-
+	online.RemoveSession(c.UUID)
 	//}
 }
 
