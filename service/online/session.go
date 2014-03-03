@@ -27,7 +27,7 @@ func init() {
 				}
 			}
 			lock.Unlock()
-			//log.Infof("clear %d sessions at %v,used %v", i, t, time.Since(t))
+			log.Infof("clear %d sessions at %v,used %v", i, t, time.Since(t))
 		}
 	}()
 }
